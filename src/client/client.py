@@ -3,7 +3,7 @@ import requests
 
 class Client:
     def __init__(self):
-        self.api = 'https://virtual-shop.pl/api'
+        self.api = 'https://virtual-shop.pl/api/clients'
 
     def add_client(self, body):
         if isinstance(body, type({'something': 'somethingelse'})) is False:
@@ -28,7 +28,11 @@ class Client:
             return 'User does not exist'
 
     def get_clients(self):
-        pass
+        response = requests.get(self.api)
+        return response
 
     def update_client(self, client_id, body):
+        pass
+
+    def delete_client(self, client_id):
         pass
