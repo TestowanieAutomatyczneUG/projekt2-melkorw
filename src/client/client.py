@@ -19,7 +19,13 @@ class Client:
             return 'Some horrible error happend'
 
     def get_client(self, client_id):
-        pass
+        if type(client_id) is not int:
+            raise TypeError('Client id must be integer')
+        response = requests.get(self.api + '/{}'.format(client_id))
+        if 200 <= response.status_code <= 299:
+            return response
+        if response.status_code == 404:
+            return 'User does not exist'
 
     def get_clients(self):
         pass
