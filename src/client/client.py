@@ -8,7 +8,7 @@ class Client:
     def add_client(self, body):
         if isinstance(body, type({'something': 'somethingelse'})) is False:
             raise TypeError('Body must be dictionary')
-        if 'email' not in body:
+        if 'email' not in body or 'name' not in body or 'surname' not in body:
             raise ValueError('Body must contain email, name and surname')
         response = requests.post(self.api+'/add', json=body)
         if 200 <= response.status_code <= 299:
@@ -32,7 +32,17 @@ class Client:
         return response
 
     def update_client(self, client_id, body):
-        pass
+        if type(client_id) is not int or isinstance(body, type({'s': 's'})) \
+                is False:
+            raise TypeError('Wrong types')
+        if 'email' not in body or 'name' not in body or 'surname' not in body:
+            raise ValueError('Body must contain email, name and surname')
+        response = requests.put(self.api+'/{}'.format(client_id), json=body)
+        if 200 <= response.status_code <= 299 or response.status_code == 409\
+                or response.status_code == 404:
+            return response
+        else:
+            return 'Something went horribly wrong'
 
     def delete_client(self, client_id):
         pass
