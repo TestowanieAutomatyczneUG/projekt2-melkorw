@@ -1,5 +1,4 @@
 import unittest
-from unittest import mock
 from assertpy import *
 from unittest.mock import *
 from client.client import Client
@@ -48,8 +47,7 @@ class ClientTest(unittest.TestCase):
         assert_that(response).contains('error')
         mock_post.assert_called_once()
 
-    @patch('src.client.client.requests.get')
-    def test_get_client_with_id(self, mock_get):
+    def test_get_client_with_id(self):
         client_id = 1
         self.temp.get_client = Mock()
         self.temp.get_client.return_value = FakeResponse(200, {'name':
@@ -80,8 +78,7 @@ class ClientTest(unittest.TestCase):
         self.temp.get_client = Mock(side_effect=Exception('Exception'))
         assert_that(self.temp.get_client).raises(Exception).when_called_with(1)
 
-    @patch('src.client.client.requests.get')
-    def test_get_clients(self, mock_get):
+    def test_get_clients(self):
         self.temp.get_clients = Mock()
         self.temp.get_clients.return_value = FakeResponse(200,
                                                           {'results': [{'name':
@@ -107,6 +104,72 @@ class ClientTest(unittest.TestCase):
         self.temp.get_clients = Mock(side_effect=Exception('Exception'))
         assert_that(self.temp.get_clients).raises(Exception)
 
+    @patch('src.client.client.requests.put')
+    def test_update_client(self, mock_put):
+        client_id = 1
+        mock_put.return_value = Mock(ok=True)
+        mock_put.return_value.status_code = 200
+        mock_put.return_value.json = {'id': client_id}
+        response = self.temp.update_client(client_id, {'name': 'Olek',
+                                                       'surname':
+                                                           'Wardyn2',
+                                                       'email': 'olekwardyn@gmail.com'})
+        assert_that(response.status_code).is_between(200, 299)
+        assert_that(response.json['id']).is_equal_to(client_id)
+        mock_put.assert_called_once()
+
+    def test_update_client_type_error(self):
+        assert_that(self.temp.update_client).raises(
+            TypeError).when_called_with('integer', {'name': 'Olek'})
+
+    def test_update_client_type_error_2(self):
+        assert_that(self.temp.update_client).raises(
+            TypeError).when_called_with(2, 'object')
+
+    def test_update_client_value_error_missing_field(self):
+        # assert with json with missing field email
+        assert_that(self.temp.update_client).raises(
+            ValueError).when_called_with(2, {'name': 'Olek', 'surname':
+            'Wardyn'})
+
+    def test_update_client_existing_email(self):
+        self.temp.update_client = Mock()
+        self.temp.update_client.return_value = FakeResponse(409,
+                                                            error_message='Email already exists')
+        response = self.temp.update_client(1, {'name': 'Olek', 'surname':
+            'Wardyn', 'email': 'olekwardyn@gmail.com'})
+        assert_that(response.error_message).is_equal_to('Email already exists')
+        self.temp.update_client.assert_called_once()
+
+    @patch('src.client.client.requests.put')
+    def test_update_client_user_does_not_exist(self, mock_put):
+        mock_put.return_value = Mock(ok=True)
+        mock_put.return_value.status_code = 404
+        mock_put.return_value.error_message = 'User does not exist'
+        response = self.temp.update_client(3, {'name': 'Olek', 'surname':
+            'Wardyn', 'email': 'olekwardyn@gmail.com'})
+        assert_that(response.error_message).contains('does', 'not')
+        mock_put.assert_called_once()
+
+    @patch('src.client.client.requests.put')
+    def test_update_client_other_errors(self, mock_put):
+        mock_put.return_value = Mock(ok=True)
+        mock_put.return_value.status_code = 403
+        response = self.temp.update_client(1, {'name': 'Olek', 'surname':
+            'Wardyn', 'email': 'olekwardyn@gmail.com'})
+        assert_that(response).is_equal_to_ignoring_case('SOMETHING WENT '
+                                                        'HORRIBLY WRONG')
+        mock_put.assert_called_once()
+
+
+    def test_update_client_connection_error(self):
+        self.temp.update_client = Mock(side_effect=Exception('Exception'))
+        assert_that(self.temp.get_clients).raises(Exception).when_called_with(2,
+                                                                         {
+                                                                             'name': 'Olek',
+                                                                             'surname':
+                                                                                 'Wardyn',
+                                                                             'email': 'olekwardyn@gmail.com'})
 
 class FakeResponse(object):
     def __init__(self, status_code, json=None, error_message=None):
