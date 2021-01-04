@@ -1,4 +1,5 @@
 import unittest
+from unittest import mock
 from assertpy import *
 from unittest.mock import *
 from client.client import Client
@@ -46,3 +47,41 @@ class ClientTest(unittest.TestCase):
             'Wardyn', 'email': 'olekwardyn@gmail.com'})
         assert_that(response).contains('error')
         mock_post.assert_called_once()
+
+    @patch('src.client.client.requests.get')
+    def test_get_client_with_id(self, mock_get):
+        client_id = 1
+        self.temp.get_client = Mock()
+        self.temp.get_client.return_value = FakeResponse(200, {'name':
+                                                                   'Olek',
+                                                               'surname':
+                                                                   'Wardyn',
+                                                               'email':
+                                                                   'olekwardyn@gmail.com', 'id': client_id})
+        response = self.temp.get_client(client_id)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json['email'], 'olekwardyn@gmail.com')
+        self.assertEqual(response.json['id'], client_id)
+        self.temp.get_client.assert_called_with(client_id)
+
+    @patch('src.client.client.requests.get')
+    def test_get_client_not_existing_client(self, mock_get):
+        mock_get.return_value = Mock(ok=True)
+        mock_get.return_value.status_code = 404
+        response = self.temp.get_client(2)
+        self.assertEqual(response, 'User does not exist')
+
+    def test_get_client_id_type_error(self):
+        assert_that(self.temp.get_client).raises(
+            TypeError).when_called_with('id')
+
+    def test_get_client_internet_error(self):
+        self.temp.get_client = Mock(side_effect=Exception('Exception'))
+        assert_that(self.temp.get_client).raises(Exception).when_called_with(1)
+
+
+class FakeResponse(object):
+    def __init__(self, status_code, json=None, error_message=None):
+        self.status_code = status_code
+        self.json = json
+        self.error_message = error_message
