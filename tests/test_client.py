@@ -57,7 +57,8 @@ class ClientTest(unittest.TestCase):
                                                                'surname':
                                                                    'Wardyn',
                                                                'email':
-                                                                   'olekwardyn@gmail.com', 'id': client_id})
+                                                                   'olekwardyn@gmail.com',
+                                                               'id': client_id})
         response = self.temp.get_client(client_id)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json['email'], 'olekwardyn@gmail.com')
@@ -78,6 +79,33 @@ class ClientTest(unittest.TestCase):
     def test_get_client_internet_error(self):
         self.temp.get_client = Mock(side_effect=Exception('Exception'))
         assert_that(self.temp.get_client).raises(Exception).when_called_with(1)
+
+    @patch('src.client.client.requests.get')
+    def test_get_clients(self, mock_get):
+        self.temp.get_clients = Mock()
+        self.temp.get_clients.return_value = FakeResponse(200,
+                                                          {'results': [{'name':
+                                                                            'Olek',
+                                                                        'surname':
+                                                                            'Wardyn',
+                                                                        'email':
+                                                                            'olekwardyn@gmail.com',
+                                                                        'id': 1},
+                                                                       {'name':
+                                                                            'Andrzej',
+                                                                        'surname':
+                                                                            'Czarodziej',
+                                                                        'email':
+                                                                            'example@gmail.com',
+                                                                        'id': 2}]})
+        response = self.temp.get_clients()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json['results']), 2)
+        self.temp.get_clients.assert_called_once()
+
+    def test_get_clients_connection_error(self):
+        self.temp.get_clients = Mock(side_effect=Exception('Exception'))
+        assert_that(self.temp.get_clients).raises(Exception)
 
 
 class FakeResponse(object):
