@@ -1,5 +1,6 @@
 # Project 2
 ![Python application](https://github.com/TestowanieAutomatyczneUG/projekt2-melkorw/workflows/Python%20application/badge.svg?branch=main)
+
 Project of E-shop
 
 To create proper coverage run following command
