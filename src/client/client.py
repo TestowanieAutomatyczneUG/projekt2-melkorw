@@ -45,4 +45,7 @@ class Client:
             return 'Something went horribly wrong'
 
     def delete_client(self, client_id):
-        pass
+        if type(client_id) is not int:
+            raise TypeError('Client id must be integer')
+        response = requests.delete(self.api+'/{}'.format(client_id))
+        return response
