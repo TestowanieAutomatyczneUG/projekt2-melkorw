@@ -194,6 +194,12 @@ class ClientTest(unittest.TestCase):
         assert_that(response.error_message).contains('User', 'not')
         self.temp.delete_client.assert_called_with(3)
 
+    def test_delete_client_connection_error(self):
+        self.temp.delete_client = MagicMock(side_effect=Exception('Exception'))
+        assert_that(self.temp.delete_client).raises(
+            Exception).when_called_with(3)
+        self.temp.delete_client.assert_called_with(3)
+
 
 class FakeResponse(object):
     def __init__(self, status_code, json=None, error_message=None):
