@@ -161,7 +161,6 @@ class ClientTest(unittest.TestCase):
                                                         'HORRIBLY WRONG')
         mock_put.assert_called_once()
 
-
     def test_update_client_connection_error(self):
         self.temp.update_client = Mock(side_effect=Exception('Exception'))
         assert_that(self.temp.get_clients).raises(Exception).when_called_with(2,
@@ -170,6 +169,31 @@ class ClientTest(unittest.TestCase):
                                                                              'surname':
                                                                                  'Wardyn',
                                                                              'email': 'olekwardyn@gmail.com'})
+
+    @patch('src.client.client.requests.delete')
+    def test_delete_client_existing(self, mock_delete):
+        client_id = 1
+        mock_delete.return_value = Mock(ok=True)
+        mock_delete.return_value.status_code = 200
+        mock_delete.return_value.json = {'deleted_id': client_id}
+        response = self.temp.delete_client(client_id)
+        assert_that(response.status_code).is_between(200, 299)
+        assert_that(response.json['deleted_id']).is_close_to(client_id, 0)
+        mock_delete.assert_called_once()
+
+    def test_delete_client_type_error(self):
+        assert_that(self.temp.delete_client).raises(
+            TypeError).when_called_with('string')
+
+    def test_delete_client_not_existing(self):
+        self.temp.delete_client = MagicMock(return_value=FakeResponse(404, error_message="User "
+                                                                      "does not exists"))
+        response = self.temp.delete_client(3)
+        assert_that(response.status_code).is_greater_than(399)
+        assert_that(response.json).is_none()
+        assert_that(response.error_message).contains('User', 'not')
+        self.temp.delete_client.assert_called_with(3)
+
 
 class FakeResponse(object):
     def __init__(self, status_code, json=None, error_message=None):
