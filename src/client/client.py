@@ -49,3 +49,9 @@ class Client:
             raise TypeError('Client id must be integer')
         response = requests.delete(self.api+'/{}'.format(client_id))
         return response
+
+    def get_client_orders(self, client_id):
+        pass
+    
+    def get_client_order(self, client_id, order_id):
+        pass

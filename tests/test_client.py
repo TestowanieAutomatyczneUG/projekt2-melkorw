@@ -200,6 +200,9 @@ class ClientTest(unittest.TestCase):
             Exception).when_called_with(3)
         self.temp.delete_client.assert_called_with(3)
 
+    def tearDown(self) -> None:
+        self.temp = None
+
 
 class FakeResponse(object):
     def __init__(self, status_code, json=None, error_message=None):
