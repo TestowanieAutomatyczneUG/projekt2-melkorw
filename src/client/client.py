@@ -10,7 +10,7 @@ class Client:
             raise TypeError('Body must be dictionary')
         if 'email' not in body or 'name' not in body or 'surname' not in body:
             raise ValueError('Body must contain email, name and surname')
-        response = requests.post(self.api+'/add', json=body)
+        response = requests.post(self.api + '/add', json=body)
         if 200 <= response.status_code <= 299:
             return response
         elif response.status_code == 409:
@@ -37,8 +37,8 @@ class Client:
             raise TypeError('Wrong types')
         if 'email' not in body or 'name' not in body or 'surname' not in body:
             raise ValueError('Body must contain email, name and surname')
-        response = requests.put(self.api+'/{}'.format(client_id), json=body)
-        if 200 <= response.status_code <= 299 or response.status_code == 409\
+        response = requests.put(self.api + '/{}'.format(client_id), json=body)
+        if 200 <= response.status_code <= 299 or response.status_code == 409 \
                 or response.status_code == 404:
             return response
         else:
@@ -47,11 +47,15 @@ class Client:
     def delete_client(self, client_id):
         if type(client_id) is not int:
             raise TypeError('Client id must be integer')
-        response = requests.delete(self.api+'/{}'.format(client_id))
+        response = requests.delete(self.api + '/{}'.format(client_id))
         return response
 
     def get_client_orders(self, client_id):
         pass
-    
+
     def get_client_order(self, client_id, order_id):
-        pass
+        if type(client_id) is not int or type(order_id) is not int:
+            raise TypeError('Client id and Order id must be integers')
+        response = requests.get(self.api + '/{}/order/{}'.format(
+            client_id, order_id))
+        return response
