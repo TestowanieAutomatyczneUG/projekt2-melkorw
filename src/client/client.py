@@ -51,7 +51,10 @@ class Client:
         return response
 
     def get_client_orders(self, client_id):
-        pass
+        if type(client_id) is not int:
+            raise TypeError('Client id and Order id must be integers')
+        response = requests.get(self.api + '/{}/orders'.format(client_id))
+        return response
 
     def get_client_order(self, client_id, order_id):
         if type(client_id) is not int or type(order_id) is not int:
