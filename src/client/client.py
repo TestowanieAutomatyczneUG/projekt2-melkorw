@@ -28,8 +28,7 @@ class Client:
             return 'User does not exist'
 
     def get_clients(self):
-        response = requests.get(self.api)
-        return response
+        return requests.get(self.api)
 
     def update_client(self, client_id, body):
         if type(client_id) is not int or isinstance(body, type({'s': 's'})) \
@@ -47,18 +46,15 @@ class Client:
     def delete_client(self, client_id):
         if type(client_id) is not int:
             raise TypeError('Client id must be integer')
-        response = requests.delete(self.api + '/{}'.format(client_id))
-        return response
+        return requests.delete(self.api + '/{}'.format(client_id))
 
     def get_client_orders(self, client_id):
         if type(client_id) is not int:
             raise TypeError('Client id and Order id must be integers')
-        response = requests.get(self.api + '/{}/orders'.format(client_id))
-        return response
+        return requests.get(self.api + '/{}/orders'.format(client_id))
 
     def get_client_order(self, client_id, order_id):
         if type(client_id) is not int or type(order_id) is not int:
             raise TypeError('Client id and Order id must be integers')
-        response = requests.get(self.api + '/{}/order/{}'.format(
+        return requests.get(self.api + '/{}/order/{}'.format(
             client_id, order_id))
-        return response
