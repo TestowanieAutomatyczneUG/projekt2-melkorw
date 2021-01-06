@@ -232,6 +232,28 @@ class ClientTest(unittest.TestCase):
         assert_that(self.temp.get_client_order).raises(
             TypeError).when_called_with("id", 3)
 
+    def test_get_client_orders_ok(self):
+        client_id = 1
+        self.temp.get_client_orders = Mock()
+        self.temp.get_client_orders.return_value = FakeResponse(200,
+                                                            {})  # add
+        # response (dont know what it is right now, stepik went down)
+        response = self.temp.get_client_orders(client_id)
+        self.assertEqual(response.status_code, 200)
+        self.temp.get_client_orders.assert_called_with(client_id)
+
+    @patch('src.client.client.requests.get')
+    def test_get_client_orders_not_existing_client(self, mock_get):
+        mock_get.return_value = Mock(ok=True)
+        mock_get.return_value.status_code = 404
+        mock_get.return_value.error_message = 'User does not exist'
+        response = self.temp.get_client_orders(3)
+        self.assertEqual(response.error_message, 'User does not exist')
+
+    def test_get_client_orders_type_error(self):
+        assert_that(self.temp.get_client_orders).raises(
+            TypeError).when_called_with("id")
+
     def tearDown(self) -> None:
         self.temp = None
 
