@@ -75,8 +75,8 @@ class ClientTest(unittest.TestCase):
             TypeError).when_called_with('id')
 
     def test_get_client_internet_error(self):
-        self.temp.get_client = Mock(side_effect=Exception('Exception'))
-        assert_that(self.temp.get_client).raises(Exception).when_called_with(1)
+        self.temp.get_client = Mock(side_effect=ConnectionError('Error'))
+        assert_that(self.temp.get_client).raises(ConnectionError).when_called_with(1)
 
     def test_get_clients(self):
         self.temp.get_clients = Mock()
@@ -101,8 +101,8 @@ class ClientTest(unittest.TestCase):
         self.temp.get_clients.assert_called_once()
 
     def test_get_clients_connection_error(self):
-        self.temp.get_clients = Mock(side_effect=Exception('Exception'))
-        assert_that(self.temp.get_clients).raises(Exception)
+        self.temp.get_clients = Mock(side_effect=ConnectionError('Error'))
+        assert_that(self.temp.get_clients).raises(ConnectionError)
 
     @patch('src.client.client.requests.put')
     def test_update_client(self, mock_put):
@@ -162,13 +162,14 @@ class ClientTest(unittest.TestCase):
         mock_put.assert_called_once()
 
     def test_update_client_connection_error(self):
-        self.temp.update_client = Mock(side_effect=Exception('Exception'))
-        assert_that(self.temp.get_clients).raises(Exception).when_called_with(2,
-                                                                         {
-                                                                             'name': 'Olek',
-                                                                             'surname':
-                                                                                 'Wardyn',
-                                                                             'email': 'olekwardyn@gmail.com'})
+        self.temp.update_client = Mock(side_effect=ConnectionError('Error'))
+        assert_that(self.temp.update_client).raises(ConnectionError).when_called_with(
+            2,
+            {
+                'name': 'Olek',
+                'surname':
+                    'Wardyn',
+                'email': 'olekwardyn@gmail.com'})
 
     @patch('src.client.client.requests.delete')
     def test_delete_client_existing(self, mock_delete):
@@ -186,8 +187,9 @@ class ClientTest(unittest.TestCase):
             TypeError).when_called_with('string')
 
     def test_delete_client_not_existing(self):
-        self.temp.delete_client = MagicMock(return_value=FakeResponse(404, error_message="User "
-                                                                      "does not exists"))
+        self.temp.delete_client = MagicMock(
+            return_value=FakeResponse(404, error_message="User "
+                                                         "does not exists"))
         response = self.temp.delete_client(3)
         assert_that(response.status_code).is_greater_than(399)
         assert_that(response.json).is_none()
@@ -195,10 +197,40 @@ class ClientTest(unittest.TestCase):
         self.temp.delete_client.assert_called_with(3)
 
     def test_delete_client_connection_error(self):
-        self.temp.delete_client = MagicMock(side_effect=Exception('Exception'))
+        self.temp.delete_client = MagicMock(side_effect=ConnectionError(
+            'Error'))
         assert_that(self.temp.delete_client).raises(
-            Exception).when_called_with(3)
+            ConnectionError).when_called_with(3)
         self.temp.delete_client.assert_called_with(3)
+
+    def test_get_client_order_ok(self):
+        client_id = 1
+        order_id = 1
+        self.temp.get_client_order = Mock()
+        self.temp.get_client_order.return_value = FakeResponse(200,
+                                                            {})  # add
+        # response (dont know what it is right now, stepik went down)
+        response = self.temp.get_client_order(client_id, order_id)
+        self.assertEqual(response.status_code, 200)
+        self.temp.get_client_order.assert_called_with(client_id, order_id)
+
+    @patch('src.client.client.requests.get')
+    def test_get_client_order_not_existing_client(self, mock_get):
+        mock_get.return_value = Mock(ok=True)
+        mock_get.return_value.status_code = 404
+        mock_get.return_value.error_message = 'User does not exist'
+        response = self.temp.get_client_order(3, 4)
+        self.assertEqual(response.error_message, 'User does not exist')
+
+    def test_get_client_order_not_existing_order(self):
+        self.temp.get_client_order = MagicMock(return_value=FakeResponse(404,
+                                                                      error_message="Order does not exists"))
+        response = self.temp.get_client_order(1, 10)
+        self.assertEqual(response.error_message, 'Order does not exists')
+
+    def test_get_client_order_type_error(self):
+        assert_that(self.temp.get_client_order).raises(
+            TypeError).when_called_with("id", 3)
 
     def tearDown(self) -> None:
         self.temp = None
