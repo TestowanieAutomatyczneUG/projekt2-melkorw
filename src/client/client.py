@@ -23,9 +23,11 @@ class Client:
             raise TypeError('Client id must be integer')
         response = requests.get(self.fake_api + '/{}'.format(client_id))
         if 200 <= response.status_code <= 299:
-            return response
+            return response.json
         if response.status_code == 404:
             return 'User does not exist'
+        else:
+            return 'Something went horribly wrong'
 
     def get_clients(self):
         return requests.get(self.fake_api)
