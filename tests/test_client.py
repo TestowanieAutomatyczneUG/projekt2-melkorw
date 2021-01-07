@@ -239,8 +239,7 @@ class ClientTest(unittest.TestCase):
     @patch('src.client.client.requests.delete')
     def test_delete_client_existing(self, mock_delete):
         client_id = 1
-        create_request_mock(mock_delete, FakeResponse(200, {'deleted_id':
-                                                                client_id}))
+        create_request_mock(mock_delete, FakeResponse(200, {'deleted_id': client_id}))
         response = self.temp.delete_client(client_id)
         assert_that(response.json['deleted_id']).is_close_to(client_id, 0)
 
@@ -354,6 +353,18 @@ class ClientTest(unittest.TestCase):
     def test_get_client_orders_type_error(self):
         assert_that(self.temp.get_client_orders).raises(
             TypeError).when_called_with("id")
+
+    @patch('src.client.client.requests.get')
+    def test_get_client_payment(self, mock_get):
+        create_request_mock(mock_get, FakeResponse(200, {'orders': [{'order': [{'name': 'name1', 'value': 10}, {'name': 'name2', 'value': 20}]}, {'order': [{'name': 'name3', 'value': 22}, {'name': 'name2', 'value': 33}]}]}))
+        response = self.temp.get_client_payment_amount(1)
+        assert_that(response).is_equal_to(85)
+
+    @patch('src.client.client.requests.get')
+    def test_get_client_payment_mock_called(self, mock_get):
+        create_request_mock(mock_get, FakeResponse(200, {'orders': [{'order': [{'name': 'name1', 'value': 10}, {'name': 'name2', 'value': 20}]}, {'order': [{'name': 'name3', 'value': 22}, {'name': 'name2', 'value': 33}]}]}))
+        self.temp.get_client_payment_amount(1)
+        mock_get.assert_called_once()
 
     def tearDown(self) -> None:
         self.temp = None
