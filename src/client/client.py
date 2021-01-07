@@ -60,3 +60,15 @@ class Client:
             raise TypeError('Client id and Order id must be integers')
         return requests.get(self.fake_api + '/{}/order/{}'.format(
             client_id, order_id))
+
+    def get_client_payment_amount(self, client_id):
+        response = self.get_client_orders(client_id)
+        amount = 0
+        orders = response.json['orders']
+        for order in orders:
+            items = order['order']
+            for item in items:
+                amount += item['value']
+
+        return amount
+
