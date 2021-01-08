@@ -27,3 +27,13 @@ class Order(ABC):
         if order_id < 0:
             raise ValueError('Order id must be greater or equal 0')
         return self.order_repository.update(order_id, new_order)
+
+    def delete_order(self, order_id):
+        if type(order_id) is not int:
+            raise TypeError('Order id is not integer')
+        if order_id < 0:
+            raise ValueError('Order is must be greater or equal 0')
+        if self.order_repository.find_by_id(order_id):
+            self.order_repository.delete(self.order_repository.find_by_id(order_id))
+            return True
+        return False
