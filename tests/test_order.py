@@ -5,8 +5,12 @@ from order.Order import Order
 from order.OrderRepository import OrderRepository
 from order.OrderModel import OrderModel
 
+
 # CLASS TESTES USING MOCK, SPY, STUB
 class OrderTest(unittest.TestCase):
+
+    def setUp(self) -> None:
+        self.model = OrderModel(1, 1, [{'name': 'name1', 'value': 2}])
 
     def test_get_order_return_none(self):
         stub_repo = Mock(OrderRepository)
@@ -36,21 +40,50 @@ class OrderTest(unittest.TestCase):
         order = Order()
         assert_that(order.get_order).raises(ValueError).when_called_with(-1)
 
-
     def test_add_order_true(self):
         stub_repo = Mock(OrderRepository)
         order = Order(stub_repo)
         stub_repo.add.return_value = True
-        response = order.add_order(OrderModel(1, 1, [{'name': 'name1', 'value': 2}]))
+        response = order.add_order(self.model)
         self.assertTrue(response)
 
     def test_add_order_add_should_be_called(self):
         spy_repo = Mock(OrderRepository)
-        order_model = OrderModel(1, 1, [{'name': 'name1', 'value': 2}])
         order = Order(spy_repo)
-        order.add_order(order_model)
-        spy_repo.add.assert_called_once_with(order_model)
+        order.add_order(self.model)
+        spy_repo.add.assert_called_once_with(self.model)
 
     def test_add_order_type_error(self):
         order = Order(OrderRepository)
         assert_that(order.add_order).raises(TypeError).when_called_with('Not order model')
+
+    def test_update_order_not_existing(self):
+        stub_repo = Mock(OrderRepository)
+        order = Order(stub_repo)
+        stub_repo.update.return_value = False
+        response = order.update_order(1, self.model)
+        self.assertFalse(response)
+
+    def test_update_order_exists(self):
+        stub_repo = Mock(OrderRepository)
+        order = Order(stub_repo)
+        stub_repo.update.return_value = True
+        response = order.update_order(1, self.model)
+        self.assertTrue(response)
+
+    def test_update_order_mock_called(self):
+        spy_repo = Mock(OrderRepository)
+        order = Order(spy_repo)
+        order.update_order(1, self.model)
+        spy_repo.update.assert_called_once()
+
+    def test_update_order_type_error(self):
+        order = Order()
+        assert_that(order.update_order).raises(TypeError).when_called_with(1, 'not order model')
+
+    def test_update_order_value_error(self):
+        order = Order()
+        assert_that(order.update_order).raises(ValueError).when_called_with(-1, self.model)
+
+    def tearDown(self) -> None:
+        self.model = None
