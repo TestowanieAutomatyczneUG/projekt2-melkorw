@@ -1,0 +1,17 @@
+include pyproject.toml
+
+# Include the README
+include *.md
+
+# Include the license file
+include LICENSE.txt
+
+# Include the data files
+recursive-include data *
+
+#Include files not needed to tox
+include *.txt
+include *.xml
+include *.yml
+include src/app.py
+include .coverage
