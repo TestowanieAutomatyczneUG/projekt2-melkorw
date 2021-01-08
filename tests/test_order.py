@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import *
+from assertpy import *
 from order.Order import Order
 from order.OrderRepository import OrderRepository
 
@@ -26,3 +27,13 @@ class OrderTest(unittest.TestCase):
         order = Order(spy_repo)
         order.get_order(1)
         spy_repo.find_by_id.assert_has_calls([call(1), call(1)])
+
+    def test_get_order_type_error(self):
+        order = Order()
+        assert_that(order.get_order).raises(TypeError).when_called_with('id')
+
+    def test_get_order_value_error(self):
+        order = Order()
+        assert_that(order.get_order).raises(ValueError).when_called_with(-1)
+
+    
