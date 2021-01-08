@@ -9,6 +9,7 @@ def create_request_mock(to_mock, fake_response):
     to_mock.return_value = fake_response
 
 
+# CLASS TESTED USING PATCH, MOCK, MAGICMOCK AND FAKE (FAKE_RESPONSE)
 class ClientTest(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = Client()
@@ -278,14 +279,14 @@ class ClientTest(unittest.TestCase):
         order_id = 1
         self.temp.get_client_order = Mock()
         self.temp.get_client_order.return_value = FakeResponse(200,
-                                                               {'order': [{'name': 'name1', 'value': 10}, {'name': 'name2', 'value': 20}]})  # add
+                                                               {'order': {'items': [{'name': 'name1', 'value': 10}, {'name': 'name2', 'value': 20}], 'order_id': order_id, 'client_id': client_id}})
         response = self.temp.get_client_order(client_id, order_id)
         self.assertEqual(response.status_code, 200)
 
     def test_get_client_order_ok_mock_called(self):
         self.temp.get_client_order = Mock()
         self.temp.get_client_order.return_value = FakeResponse(200,
-                                                               {'order': [{'name': 'name1', 'value': 10}, {'name': 'name2', 'value': 20}]})  # add
+                                                               {'order': {'items': [{'name': 'name1', 'value': 10}, {'name': 'name2', 'value': 20}], 'order_id': 1, 'client_id': 1}})
         self.temp.get_client_order(1, 1)
         self.temp.get_client_order.assert_called_with(1, 1)
 
