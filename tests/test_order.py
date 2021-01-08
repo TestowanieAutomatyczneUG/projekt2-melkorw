@@ -3,7 +3,7 @@ from unittest.mock import *
 from assertpy import *
 from order.Order import Order
 from order.OrderRepository import OrderRepository
-
+from order.OrderModel import OrderModel
 
 # CLASS TESTES USING MOCK, SPY, STUB
 class OrderTest(unittest.TestCase):
@@ -36,4 +36,21 @@ class OrderTest(unittest.TestCase):
         order = Order()
         assert_that(order.get_order).raises(ValueError).when_called_with(-1)
 
-    
+
+    def test_add_order_true(self):
+        stub_repo = Mock(OrderRepository)
+        order = Order(stub_repo)
+        stub_repo.add.return_value = True
+        response = order.add_order(OrderModel(1, 1, [{'name': 'name1', 'value': 2}]))
+        self.assertTrue(response)
+
+    def test_add_order_add_should_be_called(self):
+        spy_repo = Mock(OrderRepository)
+        order_model = OrderModel(1, 1, [{'name': 'name1', 'value': 2}])
+        order = Order(spy_repo)
+        order.add_order(order_model)
+        spy_repo.add.assert_called_once_with(order_model)
+
+    def test_add_order_type_error(self):
+        order = Order(OrderRepository)
+        assert_that(order.add_order).raises(TypeError).when_called_with('Not order model')
