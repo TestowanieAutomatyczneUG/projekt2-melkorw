@@ -11,13 +11,19 @@ class OrderRepository(ABC):
     def add(self, order):
         if not self.find_by_id(order.order_id):
             self.__data_source.append(order)
+            return True
+        return False
 
     def delete(self, order):
         self.__data_source.remove(order)
 
-    def update(self, order):
-        self.delete(order)
-        self.add(order)
+    def update(self, order_id, new_order):
+        old_order = self.find_by_id(order_id)
+        if old_order is None:
+            return False
+        self.delete(old_order)
+        self.add(new_order)
+        return True
 
     @property
     def data_source(self):
