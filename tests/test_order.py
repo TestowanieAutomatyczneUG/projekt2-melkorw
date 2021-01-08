@@ -85,5 +85,34 @@ class OrderTest(unittest.TestCase):
         order = Order()
         assert_that(order.update_order).raises(ValueError).when_called_with(-1, self.model)
 
+    def test_delete_order_return_existing_order(self):
+        stub_repo = Mock(OrderRepository)
+        order = Order(stub_repo)
+        stub_repo.find_by_id.return_value = self.model
+        response = order.delete_order(1)
+        self.assertTrue(response)
+
+    def test_delete_order_return_not_existing_order(self):
+        stub_repo = Mock(OrderRepository)
+        order = Order(stub_repo)
+        stub_repo.find_by_id.return_value = None
+        response = order.delete_order(1)
+        assert_that(response).is_false()
+
+    def test_delete_order_mock_should_be_called(self):
+        spy_repo = Mock(OrderRepository)
+        order = Order(spy_repo)
+        order.delete_order(1)
+        spy_repo.delete.assert_called_once()
+        spy_repo.find_by_id.assert_has_calls([call(1), call(1)])
+
+    def test_delete_order_type_error(self):
+        order = Order()
+        assert_that(order.delete_order).raises(TypeError).when_called_with('id')
+
+    def test_delete_order_value_error(self):
+        order = Order()
+        assert_that(order.delete_order).raises(ValueError).when_called_with(-1)
+
     def tearDown(self) -> None:
         self.model = None
