@@ -21,3 +21,9 @@ class Order(ABC):
             raise TypeError('Order is not OrderModel type')
         return self.order_repository.add(order)
 
+    def update_order(self, order_id, new_order):
+        if type(order_id) is not int or isinstance(new_order, OrderModel) is False:
+            raise TypeError('Order is not OrderModel type or order id is not int')
+        if order_id < 0:
+            raise ValueError('Order id must be greater or equal 0')
+        return self.order_repository.update(order_id, new_order)
