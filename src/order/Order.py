@@ -1,5 +1,5 @@
 from abc import ABC
-
+from order.OrderModel import OrderModel
 
 class Order(ABC):
     def __init__(self, order_repository=None):
@@ -16,5 +16,8 @@ class Order(ABC):
         else:
             return 'Item does not exist'
 
-    def get_order_item(self, order_id, item_id):
-        pass
+    def add_order(self, order):
+        if isinstance(order, OrderModel) is False:
+            raise TypeError('Order is not OrderModel type')
+        return self.order_repository.add(order)
+
